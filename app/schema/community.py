@@ -23,18 +23,19 @@ class CommunityCreate(BaseModel):
         return self
 
 class CommunityUpdate(BaseModel):
-    name: str = Field(min_length=4, max_length=250, description="Community name")
-    school: str = Field(min_length=1, max_length=250, description="School/Institution name")
-    state: str = Field(min_length=1, max_length=250, description="State of community")
+    name: Optional[str] = Field (default=None, min_length=4, max_length=250, description="Community name")
+    school: Optional[str] = Field(default=None, min_length=1, max_length=250, description="School/Institution name")
+    state: Optional[str] = Field(default=None, min_length=1, max_length=250, description="State of community")
     description: Optional[str] = None
     status : Optional[Status] = None
     join_link: Optional[str] = None
     latitude: Optional[float] = Field(default=None, ge=-90, le=90)
-    longitude: Optional[float] = Field(default=None, ge=-90, le=180)
+    longitude: Optional[float] = Field(default=None, ge=-180, le=180)
 
 class CommunityResponse(BaseModel):
     community_id: UUID
     name:str
+    slug:str
     school:str
     state:str
     description:Optional[str]
@@ -46,7 +47,7 @@ class CommunityResponse(BaseModel):
     updated_at: datetime
 
 class CommunityList(BaseModel):
-    items: List[CommunityCreate]
+    items: List[CommunityResponse]
     total: int
     page: int
     page_size: int

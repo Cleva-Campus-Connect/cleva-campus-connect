@@ -1,8 +1,6 @@
-from idlelib.configdialog import changes
 from unittest import result
 from uuid import UUID
 from fastapi import Depends, HTTPException, APIRouter, status, Query
-from starlette.status import HTTP_400_BAD_REQUEST
 from typing import Optional
 from postgrest import CountMethod
 
@@ -11,8 +9,8 @@ from app.dependencies import require_role
 from app.schema.community import CommunityResponse, CommunityCreate, CommunityList, CommunityUpdate
 from slugify import slugify
 
-Admin_Roles = ("super_admin", "head_of_campus_lead")
-All_Roles = ("super_admin", "head_of_campus_lead", "campus_lead", "ambassador" )
+Admin_Roles = ("super_admin", "head_of_campus_leads")
+All_Roles = ("super_admin", "head_of_campus_leads", "campus_lead", "ambassador" )
 router = APIRouter(prefix="/admin/communities", tags=["Admin : communities"])
 
 def make_slug(name:str)->str: # takes a text and return text tahts the function type and retturn type
@@ -94,30 +92,72 @@ def get_one_community(
     return results.data[0]
 
 
-@router.put("/{community_id}", status_code=status.HTTP_202_ACCEPTED, response_model=CommunityUpdate)
-def update_one_community(
+# @router.put("/{community_id}", status_code=status.HTTP_202_ACCEPTED, response_model=CommunityResponse)
+# def update_one_community(
+#         community_id: UUID,
+#         data: CommunityUpdate,
+#         user: dict = Depends(require_role(*All_Roles)),
+# ):
+    # is_admin = user["role"] in Admin_Roles
+
+    # if not is_admin and str(community_id) != user["community_id"]:
+    #     raise HTTPException(status.HTTP_403_FORBIDDEN, "Not Allowed")
+
+    # change = data.model_dump(exclude_unset=True)
+    # if not change:
+    #     raise HTTPException(status.HTTP_400_BAD_REQUEST, "Nothing  to update")
+    # if not is_admin and "status" in change:
+    #     raise HTTPException(status.HTTP_403_FORBIDDEN, "Only admins can change status")
+
+    # try:
+    #     results = (
+    #         supabase.table("communities").update(change).eq("community_id", str(community_id)).execute()
+    #     )
+    # except Exception:
+    #     raise HTTPException(status.HTTP_400_BAD_REQUEST, "Could not update community")
+    # if not results.data:
+    #     raise HTTPException(status.HTTP_404_NOT_FOUND, "Community not found")
+
+    # return results.data[0]
+
+@router.patch("/{community_id}", status_code=status.HTTP_202_ACCEPTED, response_model=CommunityResponse)
+def update_community(
         community_id: UUID,
         data: CommunityUpdate,
-        user: dict = Depends(require_role(*All_Roles)),
+        user: dict = Depends(require_role(*All_Roles))
 ):
     is_admin = user["role"] in Admin_Roles
-
     if not is_admin and str(community_id) != user["community_id"]:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Not Allowed")
 
-    change = data.model_dump(exclude_unset=True)
+    change= data.model_dump(exclude_unset=True)
     if not change:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Nothing  to update")
+
     if not is_admin and "status" in change:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Only admins can change status")
 
     try:
         results = (
-            supabase.table("communities").update(change).eq("community_id", str(community_id)).execute()
+            supabase.table("communities").update(change).eq("community_id", community_id).execute()
         )
-    except Exception:
+    except Exception as e:
+        print( "Update error:",e)
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Could not update community")
+
     if not results.data:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Community not found")
 
+    return results.data[0]
+
+@router.patch("/{community_id}/archive", response_model=CommunityResponse, status_code = status.HTTP_202_ACCEPTED)
+def archive_community(
+        community_id: UUID,
+        user:dict = Depends(require_role(*Admin_Roles)),
+):
+    results= (
+        supabase.table("communities").update({"status" : "archived"}).eq("community_id", str(community_id)).execute()
+    )
+    if not results.data:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Community not found")
     return results.data[0]
