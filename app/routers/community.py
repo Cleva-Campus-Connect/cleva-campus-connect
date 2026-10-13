@@ -10,10 +10,10 @@ from app.schema.community import CommunityResponse, CommunityCreate, CommunityLi
 from slugify import slugify
 
 Admin_Roles = ("super_admin", "head_of_campus_leads")
-All_Roles = ("super_admin", "head_of_campus_leads", "campus_lead", "ambassador" )
+All_Roles = ("super_admin", "head_of_campus_leads", "campus_lead", "co_lead" ,"ambassador" )
 router = APIRouter(prefix="/admin/communities", tags=["Admin : communities"])
 
-def make_slug(name:str)->str: # takes a text and return text tahts the function type and retturn type
+def make_slug(name:str)->str: # takes a text and return text that's the function type and return type
     base =slugify(name)
     slug = base
     number =2 

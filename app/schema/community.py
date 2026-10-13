@@ -51,3 +51,21 @@ class CommunityList(BaseModel):
     total: int
     page: int
     page_size: int
+
+class CommunityPublic(BaseModel):
+    community_id: UUID
+    name: str
+    slug: str
+    school: str
+    state: str
+    description: Optional[str]
+    status: str
+    join_link: Optional[str]
+    latitude: Optional[float]
+    longitude: Optional[float]
+
+class CommunityPublicList(BaseModel):
+    items: List[CommunityPublic]
+    total: int
+    page: int
+    page_size: int
