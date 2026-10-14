@@ -9,10 +9,11 @@ from pydantic import BaseModel
 from slowapi import _rate_limit_exceeded_handler
 from supabase import create_client
 
-from app.routers import community, public_community, ambassador
+from app.routers import community, public_community, ambassador, event
 from app.dependencies import get_current_user
 from app.config import settings
 from app.limiter import limiter
+
 
 from app.database import supabase
 
@@ -45,6 +46,7 @@ async def log_requests(request: Request, call_next):
 app.include_router(community.router)
 app.include_router(public_community.router)
 app.include_router(ambassador.router)
+app.include_router(event.router)
 @app.get("/")
 def home():
     return {"message": "Server is running"}

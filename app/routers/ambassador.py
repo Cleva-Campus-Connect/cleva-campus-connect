@@ -15,7 +15,7 @@ from app.schema.ambassador import AmbassadorAdmin, AmbassadorCreate, AmbassadorU
 router = APIRouter(prefix="/admin/ambassador", tags=["Admin: Ambassadors"])
 
 Admin_Roles = ("super_admin", "head_of_campus_leads")
-Add_Roles = ("super_admin", "head_of_campus_leads", "campus_lead", "co_lead")
+Add_Roles = Admin_Roles +  ("campus_lead", "co_lead")
 
 def make_unique_slugify(name:str)->str:
     base  = slugify(name) or "ambassador"
