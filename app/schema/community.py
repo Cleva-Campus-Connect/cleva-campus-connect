@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 from typing import Optional, Literal, List
 from datetime import datetime
 from uuid import UUID
@@ -7,6 +7,8 @@ from uuid import UUID
 Status = Literal["active", "coming_soon", "temporarily_inactive", "archived"]
 
 class CommunityCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     name: str = Field(min_length=4, max_length=250, description="Community name")
     school: str = Field(min_length=1, max_length=250, description="School/Instituition name")
     description: Optional[str] = None
@@ -23,6 +25,8 @@ class CommunityCreate(BaseModel):
         return self
 
 class CommunityUpdate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     name: Optional[str] = Field (default=None, min_length=4, max_length=250, description="Community name")
     school: Optional[str] = Field(default=None, min_length=1, max_length=250, description="School/Institution name")
     state: Optional[str] = Field(default=None, min_length=1, max_length=250, description="State of community")
