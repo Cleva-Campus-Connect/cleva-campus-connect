@@ -56,3 +56,42 @@ def create_event(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Could not create event")
 
     return result.data[0]
+
+@router.patch("/{event_id}", response_model=EventAdmin)
+def update_event(
+    event_id: UUID,
+    data: EventUpdate,
+    user: dict = Depends(require_roles(*ADD_ROLES)),
+):
+    existing = (
+        supabase.table("events")
+        .select("event_id, community_id")
+        .eq("event_id", str(event_id))
+        .limit(1)
+        .execute()
+    )
+    if not existing.data:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Event not found")
+
+    is_admin = user["role"] in ADMIN_ROLES
+    if not is_admin and existing.data[0]["community_id"] != user["community_id"]:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Not your campus")
+
+    change = data.model_dump(exclude_unset=True, mode="json")
+    if not change:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Nothing to update")
+
+    if not is_admin and "status" in change:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Only admins can change status")
+
+    try:
+        result = (
+            supabase.table("events")
+            .update(change)
+            .eq("event_id", str(event_id))
+            .execute()
+        )
+    except Exception:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Could not update event")
+
+    return result.data[0]
