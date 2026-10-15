@@ -3,7 +3,8 @@ from slugify import slugify
 
 from app.database import supabase
 from app.dependencies import require_role
-from app.schema.event import EventAdmin, EventCreate
+from app.schema.event import EventAdmin, EventCreate, EventUpdate
+from uuid import UUID
 
 router = APIRouter(prefix="/admin/events", tags=["Admin: Events"])
 
@@ -61,7 +62,7 @@ def create_event(
 def update_event(
     event_id: UUID,
     data: EventUpdate,
-    user: dict = Depends(require_roles(*ADD_ROLES)),
+    user: dict = Depends(require_role(*ADD_ROLES)),
 ):
     existing = (
         supabase.table("events")
