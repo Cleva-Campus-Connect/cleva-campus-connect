@@ -66,3 +66,19 @@ class EventAdminList(BaseModel):
     total: int
     page: int
     page_size: int
+
+class EventPublic(BaseModel):
+    title: str
+    slug: str
+    description: Optional[str] = None
+    start_time: AwareDatetime
+    end_time: Optional[AwareDatetime] = None
+    venue: Optional[str] = None
+    signup_link: Optional[str] = None
+
+
+class EventPublicList(BaseModel):
+    items: List[EventPublic]
+    total: int
+    page: int
+    page_size: int
